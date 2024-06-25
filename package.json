@@ -1,0 +1,28 @@
+{
+  "name": "vue-portal",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "element-plus": "^2.7.6",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.21",
+    "vue-router": "4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.8",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "axios": "^1.7.2",
+    "sass": "^1.77.6",
+    "typescript": "^5.2.2",
+    "unplugin-auto-import": "^0.17.6",
+    "unplugin-vue-components": "^0.27.1",
+    "vite": "^5.2.0",
+    "vue-tsc": "^2.0.6"
+  }
+}
