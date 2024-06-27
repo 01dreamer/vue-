@@ -1,0 +1,102 @@
+import {defineStore} from "pinia";
+import {useUserStore} from "@/stores/userStore";
+import {findNewCartListAPI, insertCartAPI, delCartAPI, updateCartItem} from "@/apis/cart";
+
+export const useCartStore = defineStore(
+    'cart',
+    ()=>{
+        const cartList = ref([]);
+        const userStore = useUserStore();
+        const isLogin = computed(()=>userStore.userInfo.token);
+
+        // 获取登录后最新购物车列表action
+        const updateLoginCartList = async () => {
+            const res = await findNewCartListAPI()
+            console.log(res.data.result)
+            cartList.value = res.data.result
+        }
+
+        const addCart = async (goods:any) => {
+            if(isLogin.value){
+                //登录之后加入购物车逻辑
+                await insertCartAPI(goods)
+                await updateLoginCartList()
+            }else {
+                //判断商品是否在购物车
+                const item = cartList.value.find(item=>goods.skuId === item.skuId);
+                if(item){
+                    item.count += goods.count;
+                }else {
+                    cartList.value.push(goods)
+                }
+            }
+        }
+        const delCart = async (skuId:any) => {
+            if(isLogin.value){
+                //登录之后加入购物车逻辑
+                console.log([skuId]);
+                await delCartAPI([skuId]);
+                await updateLoginCartList();
+            }else {
+                // 思路：
+                // 1. 找到要删除项的下标值 - splice
+                // 2. 使用splice删除找到的项，原数组改变
+                const idx = cartList.value.findIndex((item) => skuId === item.skuId)
+                cartList.value.splice(idx, 1)
+            }
+        }
+        // 计算属性
+        // 1. 总的数量 所有项的count之和
+        const allCount = computed(() => cartList.value.reduce((a, c) => a + c.count, 0))
+        // 2. 总价 所有项的count*price之和
+        const allPrice = computed(() => cartList.value.reduce((a, c) => a + c.count * c.price, 0))
+        // 全选功能
+        const checkAll = (selected:boolean) => {
+            // 把cartList中的每一项的selected都设置为当前的全选框状态
+            cartList.value.forEach(async item => {
+                if (isLogin.value) {
+                    await updateCartItem(item.skuId,{selected})
+                }
+                return item.selected = selected
+            });
+        }
+        // 3. 是否全选计算属性
+        const isAll = computed(() => cartList.value.every((item) => item.selected))
+        // 4. 已选择数量
+        const selectedCount = computed(() => cartList.value.filter(item => item.selected)
+        .reduce((a, c) => a + c.count, 0))
+        // 5. 已选择商品价钱合计
+        const selectedPrice = computed(() => cartList.value.filter(item => item.selected)
+        .reduce((a, c) => a + c.count * c.price, 0))
+        // 清除购物车
+        const clearCart = () => {
+            cartList.value = []
+        }
+        //修改购物项
+        const updateCart = async (goods:any) => {
+            console.log(goods);
+            const {skuId,count,selected} = goods
+            if (isLogin.value) {
+                await updateCartItem(skuId,{count,selected})
+            }
+        }
+
+        return{
+            cartList,
+            allCount,
+            allPrice,
+            isAll,
+            selectedCount,
+            selectedPrice,
+            addCart,
+            delCart,
+            checkAll,
+            updateLoginCartList,
+            clearCart,
+            updateCart,
+        }
+    },
+    {
+      persist:true
+    }
+)

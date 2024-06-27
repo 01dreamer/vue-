@@ -12,9 +12,15 @@ const __dirname = path.dirname(__filename);
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    host: '127.0.0.1',
+    port: 5173, // 端口
+  },
   plugins: [
     //配置插件
     AutoImport({
+      imports:["vue","vue-router","pinia"],
+      dts: 'src/auto-imports.d.ts',
       resolvers:[ElementPlusResolver()],
     }),
     Components({
@@ -22,6 +28,7 @@ export default defineConfig({
         // 1. 配置elementPlus采用sass样式配色系统
         ElementPlusResolver({ importStyle: "sass" }),
       ],
+      dts: 'src/components.d.ts',
     }),
     vue()],
   resolve: {
